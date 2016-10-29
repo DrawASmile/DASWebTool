@@ -1,0 +1,189 @@
+<html>
+
+<head>
+	<script src="https://www.gstatic.com/firebasejs/3.5.2/firebase.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-database.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script>
+	  // Initialize Firebase
+	  var config = {
+	    apiKey: "AIzaSyDepO1eNMR4yIWpfxIZPj0kFSC9GYnJEqI",
+	    authDomain: "draw-a-smile.firebaseapp.com",
+	    databaseURL: "https://draw-a-smile.firebaseio.com",
+	    storageBucket: "draw-a-smile.appspot.com",
+	    messagingSenderId: "911728225506"
+	  };
+	  firebase.initializeApp(config);
+	</script>
+
+	<script>
+			var phoneNumbers = new Array();
+
+			String.prototype.hashCode = function(){
+		    if (Array.prototype.reduce){
+		        return this.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
+		    } 
+		    var hash = 0;
+		    if (this.length === 0) return hash;
+		    for (var i = 0; i < this.length; i++) {
+		        var character  = this.charCodeAt(i);
+		        hash  = ((hash<<5)-hash)+character;
+		        hash = hash & hash; // Convert to 32bit integer
+		    }
+		    return hash;
+		}
+
+		function ObjectLength( object ) {
+		    var length = 0;
+		    for( var key in object ) {
+		        if( object.hasOwnProperty(key) ) {
+		            ++length;
+		        }
+		    }
+		    return length;
+		};
+
+		function getCheckedInUsersHTML( object ) {
+			var result = "";
+			var length = ObjectLength(object);
+		    for(var i = 0; i < length; i++)
+		    {
+				result += (Object.keys(object)[i] + "<br></br>");
+		    }
+		    var newRes = result.replace("uid2", "");
+		    return newRes;
+		
+		}
+		function getVolunteersHTML( object ) {
+			var result = "";
+			var length = ObjectLength(object);
+		    for(var i = 0; i < length; i++)
+		    {
+		    	var volunteerObj = object[Object.keys(object)[i]];
+				result += volunteerObj["name"] + " : " + volunteerObj["phone"] + "<br></br>";
+
+				if(volunteerObj["phone"] != "123-456-7890")
+				{
+					console.log("lol");
+					phoneNumbers.push(volunteerObj["phone"]);
+				}
+		    }
+		    var newRes = result.replace("John Doe : 123-456-7890", "");
+		    return newRes;
+		};
+		</script>
+
+
+	<script>
+		function firebaseDB_getCheckedInUsers()
+		{
+			if(document.getElementById("input_password").value.hashCode() != 1976407474)
+			{
+				alert("You entered the wrong admin password.");
+				return;
+			}
+
+			return firebase.database().ref('/checkedInUsers/').once('value').then(function(snapshot) {
+			  var ref = snapshot.val();
+
+			  	document.getElementById("label_numCheckedIn").innerHTML = (ObjectLength(ref) - 1);
+			  
+			  document.getElementById("list_checkedInUsersList").innerHTML = getCheckedInUsersHTML(ref);
+
+			});
+		}
+		function firebaseDB_getVolunteers()
+		{
+			if(document.getElementById("input_password").value.hashCode() != 1976407474)
+			{
+				alert("You entered the wrong admin password.");
+				return;
+			}
+
+			return firebase.database().ref('/volunteers/').once('value').then(function(snapshot) {
+			  var ref = snapshot.val();
+
+			  	document.getElementById("label_numVolunteersRegistered").innerHTML = (ObjectLength(ref) - 1);
+			  
+			  document.getElementById("list_volunteersList").innerHTML = getVolunteersHTML(ref);
+
+			});
+		}
+		function texting_sendSMS()
+		{
+			if(document.getElementById("input_password").value.hashCode() != 1976407474)
+			{
+				alert("You entered the wrong admin password.");
+				return;
+			}
+
+			var message = document.getElementById("input_volunteerSMS").value;
+			document.getElementById("input_volunteerSMS").value = "";
+			for (var i = 0; i < phoneNumbers.length; i++) {
+				var number = phoneNumbers[0];
+			     //TODO: SEND SMS TO THE NUMBER
+		}
+	</script>
+</head>
+
+<body>
+
+<h1>Enter the admin password in the box, and then use the buttons to perform the actions you need to do</h1>
+
+
+<form>
+  Password:<br>
+  <input id="input_password" type="password" name="password"><br>
+</form>
+
+<br></br>
+
+<hr/>
+
+<h3 id="id_error1">View Checked In Users</h3>
+
+<button onclick="firebaseDB_getCheckedInUsers()">Load Checked In Users Data</button>
+<p><u>Number of checked in users: </u></p>
+
+<div id="label_numCheckedIn">
+N/A
+</div>
+<p><u>List of all checked in users:</u></p>
+
+<div id = "list_checkedInUsersList">
+N/A
+
+</div>
+
+<hr/>
+
+<h3>Manage Volunteers</h3>
+
+<button onclick="firebaseDB_getVolunteers()">Load Volunteers Data</button>
+<br></br>
+<br></br>
+
+  Send a text to volunteers (load volunteer data first):<br>
+  <button onclick="texting_sendSMS()">Send SMS</button><br>
+  <textarea id="input_volunteerSMS" type="text" name="sms" style="width:500px;height:250px"></textarea>
+  <br>
+
+<p><u>Number of volunteers registered: </u></p>
+
+<div id="label_numVolunteersRegistered">
+N/A
+</div>
+<p><u>List of all volunteers:</u></p>
+
+<div id = "list_volunteersList">
+N/A
+
+</div>
+
+
+
+
+
+</body>
+
+</html>
